@@ -1,3 +1,6 @@
+# لقراءة الشرح بالعربية تفضل [README.ar](https://github.com/Abu3safeer/subdl_pyuploader/blob/main/README.ar.md)
+
+
 # Subdl Uploader (subdl_pyuploader)
 
 A powerful GUI application for easily uploading subtitles to Subdl with advanced features and automated processing.
