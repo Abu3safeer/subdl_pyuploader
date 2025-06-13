@@ -544,23 +544,23 @@ class SubdlUploaderWindow(QMainWindow):
             self,
             "Select Subtitle Files",
             "",
-            "Subtitle Files (*.srt *.sub *.ass);;All Files (*.*)"
+            "Subtitle Files (*.srt *.sup *.ass);;All Files (*.*)"  
         )
         self.process_files(files)
     
     def process_files(self, files):
         """Process list of files and check for multiple series"""
         all_files = []
-        detected_series = set()  # Track all detected series
+        detected_series = set()
         
-        # First collect all subtitle files from directories and files
+        # Update file extensions in directory scanning
         for file_path in files:
             if Path(file_path).is_dir():
                 all_files.extend([str(f) for f in Path(file_path).rglob('*') 
-                                if f.suffix.lower() in ('.srt', '.sub', '.ass')])
-            elif Path(file_path).suffix.lower() in ('.srt', '.sub', '.ass'):
+                                if f.suffix.lower() in ('.srt', '.sup', '.ass')])  
+            elif Path(file_path).suffix.lower() in ('.srt', '.sup', '.ass'):  
                 all_files.append(file_path)
-    
+
         # Create progress dialog
         processing_dialog = QProgressDialog("Processing files...", None, 0, 100, self)
         processing_dialog.setWindowTitle("Processing")
