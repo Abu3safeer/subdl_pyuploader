@@ -1,20 +1,22 @@
 import json
 import os
 import requests
+from pathlib import Path
 from PyQt6.QtGui import QPixmap, QColor
 from PyQt6.QtCore import QByteArray, Qt, QThread, pyqtSignal
 from pathlib import Path
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QApplication,
                             QPushButton, QDialog, QLineEdit, QFormLayout, QTableWidget,
                             QDialogButtonBox, QLabel, QMessageBox, QTableWidgetItem,
-                            QFileDialog, QMenu, QTabWidget, QSpacerItem, QSizePolicy,
-                            QListWidget, QListWidgetItem, QScrollArea, QFrame, QGridLayout,
-                            QTextEdit, QComboBox, QSpinBox, QGroupBox, QProgressDialog)  # Added QProgressDialog
+                            QFileDialog, QTabWidget, QListWidget, QListWidgetItem, 
+                            QScrollArea, QFrame, QTextEdit, QComboBox, 
+                            QSpinBox, QGroupBox, QProgressDialog)  
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QDragEnterEvent, QDropEvent
 from guessit import guessit
 from subdl_api import SubdlAPI
 from tmdb_api import TMDBApi
+import logging
 
 class DragDropTable(QTableWidget):
     file_dropped = pyqtSignal(list)
@@ -59,7 +61,7 @@ class SubdlUploaderWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Subdl Uploader")
-        
+                
         # Create main widget and tab widget
         self.tab_widget = QTabWidget()
         self.setCentralWidget(self.tab_widget)
@@ -569,7 +571,7 @@ class SubdlUploaderWindow(QMainWindow):
         processing_dialog.setCancelButton(None)
         processing_dialog.setAutoClose(False)
     
-        # Create processing thread
+        # Create processing thread with config
         self.processing_thread = FileProcessingThread(all_files)
     
         def handle_file_processed(file_path, file_info):
@@ -1261,24 +1263,28 @@ class UploadOptionsDialog(QDialog):
 class FileProcessingThread(QThread):
     progress = pyqtSignal(str, int)
     file_processed = pyqtSignal(str, dict)
-    detection_complete = pyqtSignal(set)  # New signal for series detection
+    detection_complete = pyqtSignal(set)
     
-    def __init__(self, files):
+    def __init__(self, files): 
         super().__init__()
         self.files = files
-        
+    
     def process_single_file(self, file_path):
         """Process a single file and return its info"""
         filename = os.path.basename(file_path)
-        guess = guessit(filename)
-        if title := guess.get('title'):
-            file_info = {
-                'season': str(guess.get('season', '')),
-                'episode': str(guess.get('episode', '')),
-                'title': title,
-                'filename': filename
-            }
-            return title.lower(), file_info
+        try:
+            # Use stored config file
+            guess = guessit(filename)
+            if title := guess.get('title'):
+                file_info = {
+                    'season': str(guess.get('season', '')),
+                    'episode': str(guess.get('episode', '')),
+                    'title': title,
+                    'filename': filename
+                }
+                return title.lower(), file_info
+        except Exception as e:
+            logging.error(f"Error processing file {filename}: {e}")
         return None, None
         
     def run(self):
